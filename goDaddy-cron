@@ -1,0 +1,1 @@
+*/5 * * * * /usr/bin/bash /GoDaddy.sh > /proc/1/fd/1
