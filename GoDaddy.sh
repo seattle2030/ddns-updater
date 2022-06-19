@@ -20,11 +20,11 @@
 # Begin settings
 # Get the Production API key/secret from https://developer.godaddy.com/keys/.
 # Ensure it's for "Production" as first time it's created for "Test".
-Key=fsvVddxVsfe_frhN1SAgfdgCdAfyVdWDdv
-Secret=FwkUfafh8dgrsdydrdfC1e
+Key=${KEY}
+Secret=${SECRET}
  
 # Domain to update.
-Domain=teanazar.com
+Domain=${DOMAIN}
  
 # Advanced settings - change only if you know what you're doing :-)
 # Record type, as seen in the DNS setup page, default A.
@@ -35,7 +35,7 @@ Name=@
  
 # Time To Live in seconds, minimum default 600 (10mins).
 # If your public IP seldom changes, set it to 3600 (1hr) or more for DNS servers cache performance.
-TTL=600
+TTL=#TTL#
  
 # Writable path to last known Public IP record cached. Best to place in tmpfs.
 CachedIP=/tmp/current_ip
