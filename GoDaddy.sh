@@ -20,22 +20,22 @@
 # Begin settings
 # Get the Production API key/secret from https://developer.godaddy.com/keys/.
 # Ensure it's for "Production" as first time it's created for "Test".
-Key=${KEY}
-Secret=${SECRET}
+KEY=${KEY}
+SECRET=${SECRET}
  
-# Domain to update.
-Domain=${DOMAIN}
+# DOMAIN to update.
+DOMAIN=${DOMAIN}
  
 # Advanced settings - change only if you know what you're doing :-)
 # Record type, as seen in the DNS setup page, default A.
-Type=A
+Type=${TYPE}
  
 # Record name, as seen in the DNS setup page, default @.
-Name=@
+Name=${NAME}
  
 # Time To Live in seconds, minimum default 600 (10mins).
 # If your public IP seldom changes, set it to 3600 (1hr) or more for DNS servers cache performance.
-TTL=#TTL#
+TTL=${TTL}
  
 # Writable path to last known Public IP record cached. Best to place in tmpfs.
 CachedIP=/tmp/current_ip
@@ -60,10 +60,10 @@ FailedExec=''
 Curl=$(which curl 2>/dev/null)
 [ "${Curl}" = "" ] &&
 echo "Error: Unable to find 'curl CLI'." && exit 1
-[ -z "${Key}" ] || [ -z "${Secret}" ] &&
-echo "Error: Requires API 'Key/Secret' value." && exit 1
-[ -z "${Domain}" ] &&
-echo "Error: Requires 'Domain' value." && exit 1
+[ -z "${KEY}" ] || [ -z "${SECRET}" ] &&
+echo "Error: Requires API 'KEY/SECRET' value." && exit 1
+[ -z "${DOMAIN}" ] &&
+echo "Error: Requires 'DOMAIN' value." && exit 1
 [ -z "${Type}" ] && Type=A
 [ -z "${Name}" ] && Name=@
 [ -z "${TTL}" ] && TTL=600
@@ -81,19 +81,19 @@ eval ${FailedExec}
 exit 1
 fi
 if [ "$(cat ${CachedIP} 2>/dev/null)" != "${PublicIP}" ];then
-echo -n "Checking '${Domain}' IP records from 'GoDaddy'..."
-Check=$(${Curl} -kLsH"Authorization: sso-key ${Key}:${Secret}" \
+echo -n "Checking 'TYPE ${Type} NAME ${Name} ${DOMAIN}' IP records from 'GoDaddy'..."
+Check=$(${Curl} -kLsH"Authorization: sso-key ${KEY}:${SECRET}" \
 -H"Content-type: application/json" \
-https://api.godaddy.com/v1/domains/${Domain}/records/${Type}/${Name} \
+https://api.godaddy.com/v1/domains/${DOMAIN}/records/${Type}/${Name} \
 2>/dev/null|grep -Eo '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' 2>/dev/null)
 if [ $? -eq 0 ] && [ "${Check}" = "${PublicIP}" ];then
 echo -n ${Check}>${CachedIP}
 echo -e "unchanged!\nCurrent 'Public IP' matches 'GoDaddy' records. No update required!"
 else
-echo -en "changed!\nUpdating '${Domain}'..."
-Update=$(${Curl} -kLsXPUT -H"Authorization: sso-key ${Key}:${Secret}" \
+echo -en "changed!\nUpdating 'TYPE ${Type} NAME ${Name} ${DOMAIN}'..."
+Update=$(${Curl} -kLsXPUT -H"Authorization: sso-key ${KEY}:${SECRET}" \
 -H"Content-type: application/json" -w"%{http_code}" -o/dev/null \
-https://api.godaddy.com/v1/domains/${Domain}/records/${Type}/${Name} \
+https://api.godaddy.com/v1/domains/${DOMAIN}/records/${Type}/${Name} \
 -d"[{\"data\":\"${PublicIP}\",\"ttl\":${TTL}}]" 2>/dev/null)
 if [ $? -eq 0 ] && [ "${Update}" -eq 200 ];then
 echo -n ${PublicIP}>${CachedIP}
